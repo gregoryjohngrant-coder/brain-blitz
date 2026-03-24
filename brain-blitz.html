@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Blitz - Tower Defense Quiz</title>
+    <link rel="stylesheet" href="brain-blitz.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="screen">
+            <div class="container login-container">
+                <h1>🎮 Brain Blitz Account</h1>
+                
+                <div class="login-tabs">
+                    <button class="login-tab-btn active" onclick="switchLoginTab(event,'login')">Login</button>
+                    <button class="login-tab-btn" onclick="switchLoginTab(event,'register')">Register</button>
+                </div>
+                
+                <!-- Login Tab -->
+                <div id="loginTab" class="login-tab active">
+                    <h2>Login to Your Account</h2>
+                    <div class="form-group">
+                        <label>Username:</label>
+                        <input type="text" id="loginUsername" placeholder="Enter username" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Password:</label>
+                        <input type="password" id="loginPassword" placeholder="Enter password" class="form-control">
+                    </div>
+                    <div id="loginError" class="error-message"></div>
+                    <button onclick="handleLogin()" class="btn btn-primary" style="width: 100%;">Login</button>
+                    <button onclick="resetAllData()" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">Reset All Data</button>
+                </div>
+                
+                <!-- Register Tab -->
+                <div id="registerTab" class="login-tab">
+                    <h2>Create New Account</h2>
+                    <p style="color: #666; font-size: 14px;">Create your account and unlock exclusive items with cheat codes!</p>
+                    <div class="form-group">
+                        <label>Username:</label>
+                        <input type="text" id="registerUsername" placeholder="Enter username" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Password:</label>
+                        <input type="password" id="registerPassword" placeholder="Enter password" class="form-control">
+                    </div>
+                    <div id="registerError" class="error-message"></div>
+                    <button onclick="handleRegister()" class="btn btn-primary" style="width: 100%;">Register</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quiz Creator Screen -->
+        <div id="quizCreator" class="screen active">
+            <div class="container">
+                <h1>📚 Quiz Creator</h1>
+                
+                <div class="creator-tabs">
+                    <button class="tab-btn active" onclick="switchCreatorTab('form')">Form Builder</button>
+                    <button class="tab-btn" onclick="switchCreatorTab('paste')">Paste Data</button>
+                    <button class="tab-btn" onclick="switchCreatorTab('blooket')">Import from Brain Blitz</button>
+                </div>
+
+                <!-- Form Builder Tab -->
+                <div id="formTab" class="creator-tab active">
+                    <div class="quiz-name-section">
+                        <input type="text" id="formQuizName" placeholder="Quiz Name (e.g., Biology 101)" class="quiz-name-input">
+                    </div>
+
+                    <div id="questionsContainer" class="questions-container"></div>
+
+                    <div class="button-group">
+                        <button onclick="addQuestion()" class="btn btn-secondary">+ Add Question</button>
+                        <button onclick="createQuizFromForm()" class="btn btn-primary">Create Quiz</button>
+                    </div>
+                </div>
+
+                <!-- Paste Data Tab -->
+                <div id="pasteTab" class="creator-tab">
+                    <div class="instructions">
+                        <p><strong>Paste quiz data in this format (tab-separated):</strong></p>
+                        <p>Question | Answer1 | Answer2 | Answer3 | Answer4 | Correct(1-4) | TimeLimit(sec)</p>
+                    </div>
+                    <textarea id="quizInput" placeholder="Paste your quiz questions here..." rows="15"></textarea>
+                    <div class="button-group">
+                        <button onclick="createQuizFromInput()" class="btn btn-primary">Create Quiz</button>
+                        <button onclick="loadSampleQuiz()" class="btn btn-secondary">Load Sample Quiz</button>
+                    </div>
+                </div>
+
+                <!-- Brain Blitz Import Tab -->
+                <div id="blooketTab" class="creator-tab">
+                    <div class="instructions">
+                        <p><strong>Search and import public Brain Blitz quizzes</strong></p>
+                    </div>
+                    <input type="text" id="blooketSearch" placeholder="Search quiz title or subject..." class="search-input">
+                    <button onclick="searchBlooketQuizzes()" class="btn btn-primary">Search</button>
+                    <div id="blooketResults" class="blooket-results"></div>
+                </div>
+
+                <div id="parseError" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- Quiz Selection Screen -->
+        <div id="quizSelector" class="screen">
+            <div class="container">
+                <div id="accountDisplay"></div>
+                <div class="menu-buttons">
+                    <button onclick="openShop()" class="btn btn-secondary">🎨 Shop</button>
+                    <button onclick="openProfile()" class="btn btn-secondary">👤 Profile</button>
+                    <button onclick="openCheatScreen()" class="btn btn-primary">🎯 Cheat Codes</button>
+                </div>
+                <h1>📋 Select Quiz</h1>
+                <div id="quizList" class="quiz-list"></div>
+                <button onclick="goToQuizCreator()" class="btn btn-secondary">Back to Creator</button>
+            </div>
+        </div>
+
+        <!-- Game Mode Selection Screen -->
+        <div id="gameModeSelector" class="screen">
+            <div class="container">
+                <h1>🎮 Choose Game Type</h1>
+                <p style="text-align: center; color: #666; margin-bottom: 30px;">Select how you want to play:</p>
+                <div class="mode-selection">
+                    <div class="mode-card" onclick="selectGameType('solo')">
+                        <div class="mode-icon">🎯</div>
+                        <h3>Solo Game</h3>
+                        <p>Play against the computer in various game modes</p>
+                        <div class="mode-tag">Single Player</div>
+                    </div>
+                    <div class="mode-card" onclick="selectGameType('public')">
+                        <div class="mode-icon">🌍</div>
+                        <h3>Public Game</h3>
+                        <p>Create a lobby or join friends' public games</p>
+                        <div class="mode-tag">Multiplayer</div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button onclick="returnToQuizSelector()" class="btn btn-secondary">Back to Quiz List</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Customization Screen -->
+        <div id="gameCustomization" class="screen">
+            <div class="container">
+                <h1 id="customizationTitle">🎮 Customize Your Game</h1>
+                <p style="text-align: center; color: #666; margin-bottom: 30px;">Adjust settings for your selected game mode:</p>
+                
+                <div class="customization-options">
+                    <div class="customization-section">
+                        <h3>⚙️ Difficulty Level</h3>
+                        <div class="option-group">
+                            <label><input type="radio" name="difficulty" value="easy" checked> Easy (More time, hints available)</label>
+                            <label><input type="radio" name="difficulty" value="normal"> Normal (Standard settings)</label>
+                            <label><input type="radio" name="difficulty" value="hard"> Hard (Less time, no hints)</label>
+                            <label><input type="radio" name="difficulty" value="expert"> Expert (Very challenging)</label>
+                        </div>
+                    </div>
+
+                    <div class="customization-section">
+                        <h3>⏱️ Time Settings</h3>
+                        <div class="option-group">
+                            <label>Question Time Limit: <input type="range" id="timeLimit" min="5" max="60" value="20" step="5"> <span id="timeLimitValue">20</span> seconds</label>
+                            <label><input type="checkbox" id="showTimer"> Show countdown timer</label>
+                        </div>
+                    </div>
+
+                    <div class="customization-section">
+                        <h3>🎯 Game Rules</h3>
+                        <div class="option-group">
+                            <label><input type="checkbox" id="randomOrder" checked> Random question order</label>
+                            <label><input type="checkbox" id="showProgress"> Show progress bar</label>
+                            <label><input type="checkbox" id="allowSkips"> Allow skipping questions</label>
+                            <label>Max Questions: <input type="number" id="maxQuestions" min="5" max="200" value="50"></label>
+                        </div>
+                    </div>
+
+                    <div class="customization-section">
+                        <h3>🏆 Scoring & Rewards</h3>
+                        <div class="option-group">
+                            <label>Points Multiplier: <input type="range" id="pointMultiplier" min="1" max="5" value="1" step="0.5"> <span id="pointMultiplierValue">1.0x</span></label>
+                            <label><input type="checkbox" id="bonusStreaks" checked> Bonus points for answer streaks</label>
+                            <label><input type="checkbox" id="timeBonuses"> Time bonuses for fast answers</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="startGameWithSettings()" class="btn btn-primary">Start Game</button>
+                    <button onclick="goBackToModeSelector()" class="btn btn-secondary">Back to Modes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Solo Game Mode Selection -->
+        <div id="soloModeSelector" class="screen">
+            <div class="container">
+                <h1>🎮 Select Game Mode</h1>
+                <p style="text-align: center; color: #666; margin-bottom: 30px;">Choose your preferred game mode:</p>
+                <div class="game-modes-grid">
+                    <div class="game-mode-card" onclick="startSoloGame('tower')">
+                        <div class="mode-icon">🛡️</div>
+                        <h3>Tower Defense</h3>
+                        <p>Defend your tower from enemies by answering questions correctly</p>
+                    </div>
+                    <div class="game-mode-card" onclick="startSoloGame('quiz')">
+                        <div class="mode-icon">📚</div>
+                        <h3>Classic Quiz</h3>
+                        <p>Traditional quiz format with accuracy tracking</p>
+                    </div>
+                    <div class="game-mode-card" onclick="startSoloGame('speedrun')">
+                        <div class="mode-icon">⚡</div>
+                        <h3>Speed Run</h3>
+                        <p>Answer as many questions as possible in 60 seconds</p>
+                    </div>
+                    <div class="game-mode-card" onclick="startSoloGame('survivor')">
+                        <div class="mode-icon">💪</div>
+                        <h3>Survivor Mode</h3>
+                        <p>Get 3 wrong answers and game over. How far can you go?</p>
+                    </div>
+                    <div class="game-mode-card" onclick="startSoloGame('memory')">
+                        <div class="mode-icon">🧠</div>
+                        <h3>Memory Match</h3>
+                        <p>Match questions with answers as fast as you can</p>
+                    </div>
+                    <div class="game-mode-card" onclick="startSoloGame('flashcard')">
+                        <div class="mode-icon">📇</div>
+                        <h3>Flashcard</h3>
+                        <p>Study with interactive flashcard mode</p>
+                    </div>
+                    <div class="game-mode-card" onclick="startSoloGame('onlyup')">
+                        <div class="mode-icon">⬆️</div>
+                        <h3>Only Up!</h3>
+                        <p>Platformer game - climb higher by answering questions correctly</p>
+                    </div>
+                    <div class="game-mode-card" onclick="startSoloGame('timeattack')">
+                        <div class="mode-icon">⏱️</div>
+                        <h3>Time Attack</h3>
+                        <p>Race against time - answer 50 questions as fast as possible!</p>
+                    </div>
+                    <div class="game-mode-card" onclick="startSoloGame('category')">
+                        <div class="mode-icon">📂</div>
+                        <h3>Category Challenge</h3>
+                        <p>Master specific subjects with focused question sets</p>
+                    </div>
+                    <div class="game-mode-card" onclick="startSoloGame('boss')">
+                        <div class="mode-icon">👹</div>
+                        <h3>Boss Battle</h3>
+                        <p>Fight increasingly difficult bosses with strategic questions</p>
+                    </div>
+                    <div class="game-mode-card" onclick="startSoloGame('puzzle')">
+                        <div class="mode-icon">🧩</div>
+                        <h3>Puzzle Mode</h3>
+                        <p>Solve logic puzzles and brain teasers</p>
+                    </div>
+                    <div class="game-mode-card" onclick="startSoloGame('marathon')">
+                        <div class="mode-icon">🏃</div>
+                        <h3>Marathon Mode</h3>
+                        <p>Endurance test - 100 questions with stamina management</p>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button onclick="goBackToGameType()" class="btn btn-secondary">Back</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Public Game Lobby -->
+        <div id="publicGameLobby" class="screen">
+            <div class="container">
+                <h1>🌍 Public Games</h1>
+                <div class="lobby-section">
+                    <h2>Create or Join Game</h2>
+                    <div class="lobby-options">
+                        <div class="lobby-card">
+                            <h3>Create New Game</h3>
+                            <p>Start a new game and share the code with friends</p>
+                            <div class="form-group">
+                                <label>Select Game Mode:</label>
+                                <select id="publicGameMode" class="form-control">
+                                    <option value="tower">Tower Defense</option>
+                                    <option value="quiz">Classic Quiz</option>
+                                    <option value="speedrun">Speed Run</option>
+                                    <option value="survivor">Survivor Mode</option>
+                                </select>
+                            </div>
+                            <button onclick="createPublicGame()" class="btn btn-primary">Create Game</button>
+                        </div>
+                        <div class="lobby-card">
+                            <h3>Join Game</h3>
+                            <p>Enter a game code to join a friend's game</p>
+                            <div class="form-group">
+                                <label>Game Code:</label>
+                                <input type="text" id="gameCode" placeholder="e.g., ABC123" maxlength="6" class="form-control">
+                            </div>
+                            <button onclick="joinPublicGame()" class="btn btn-primary">Join Game</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lobby-section">
+                    <h2>Active Games</h2>
+                    <div id="activeGames" class="games-list"></div>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="goBackToGameType()" class="btn btn-secondary">Back</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multiplayer Game Lobby (Waiting for Players) -->
+        <div id="multiplayerLobby" class="screen">
+            <div class="container">
+                <h1>⏳ Game Lobby</h1>
+                <div class="lobby-info">
+                    <div class="info-box">
+                        <h3>Game Code: <span id="lobbyGameCode" class="game-code">LOADING</span></h3>
+                        <p>Share this code to invite friends</p>
+                    </div>
+                    <div class="info-box">
+                        <h3>Players Joined: <span id="playerCount">1</span>/4</h3>
+                        <div id="playerList" class="player-list"></div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button onclick="startMultiplayerGame()" class="btn btn-primary">Start Game (4+ players)</button>
+                    <button onclick="leaveLobby()" class="btn btn-secondary">Leave Lobby</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen (Tower Defense) -->
+        <div id="gameScreen" class="screen">
+            <div class="game-container">
+                <div class="game-header">
+                    <div class="score-display">
+                        <strong>Score:</strong> <span id="score">0</span>
+                    </div>
+                    <div class="quiz-title" id="quizTitle">Quiz</div>
+                    <div class="health-display">
+                        <strong>Health:</strong> <span id="health">100</span>
+                    </div>
+                </div>
+
+                <div class="game-area">
+                    <canvas id="gameCanvas"></canvas>
+                </div>
+
+                <div class="question-panel">
+                    <div class="timer-bar">
+                        <div id="timerBar" class="timer-fill"></div>
+                    </div>
+                    <h3 id="questionText"></h3>
+                    <div id="answersContainer" class="answers-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Regular Quiz Screen -->
+        <div id="regularQuizScreen" class="screen">
+            <div class="quiz-container">
+                <div class="quiz-header">
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                    <div class="quiz-info">
+                        <span id="questionNumber">1 of 10</span>
+                        <span id="quizScore">Score: 0</span>
+                    </div>
+                </div>
+
+                <div class="quiz-content">
+                    <h2 id="regularQuestionText"></h2>
+                    <div id="regularAnswersContainer" class="quiz-answers"></div>
+                </div>
+
+                <div class="quiz-timer">
+                    <div id="timeLeft">Time: <span id="seconds">0</span>s</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" class="screen">
+            <div class="container game-over-container">
+                <h1 id="gameOverTitle">Game Over!</h1>
+                <div class="game-stats">
+                    <p><strong>Final Score:</strong> <span id="finalScore">0</span></p>
+                    <p><strong>Questions Answered:</strong> <span id="questionsAnswered">0</span></p>
+                    <p><strong>Correct Answers:</strong> <span id="correctAnswers">0</span></p>
+                    <p id="accuracyText" style="display: none;"><strong>Accuracy:</strong> <span id="accuracy">0</span>%</p>
+                </div>
+                <div class="button-group">
+                    <button onclick="returnToQuizSelector()" class="btn btn-primary">Play Another Quiz</button>
+                    <button onclick="goToQuizCreator()" class="btn btn-secondary">Create New Quiz</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="shopScreen" class="screen">
+            <div class="container">
+                <h1>🛍️ Shop</h1>
+                <div class="account-header-shop">
+                    <p class="currency-display">💰 Coins: <span id="coinsDisplay">0</span></p>
+                </div>
+                <div id="shopContent"></div>
+                <button onclick="returnToQuizSelector()" class="btn btn-secondary">Back</button>
+            </div>
+        </div>
+
+        <!-- Only Up Game Screen -->
+        <div id="onlyUpGame" class="screen">
+            <div class="game-container">
+                <div class="game-header">
+                    <div class="score-display">
+                        <strong>Score:</strong> <span id="onlyUpScore">0</span>
+                    </div>
+                    <div class="quiz-title">Only Up!</div>
+                    <div class="height-display">
+                        <strong>Height:</strong> <span id="onlyUpHeight">0</span>
+                    </div>
+                </div>
+
+                <div class="game-area">
+                    <canvas id="onlyUpCanvas" width="900" height="500"></canvas>
+                </div>
+
+                <div class="question-panel">
+                    <h3 id="onlyUpQuestion"></h3>
+                    <div id="onlyUpAnswers" class="answers-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Only Up Game Over Screen -->
+        <div id="onlyUpGameOver" class="screen">
+            <div class="container game-over-container">
+                <h1>🏆 Game Over!</h1>
+                <div class="game-stats">
+                    <p><strong>Final Score:</strong> <span id="onlyUpFinalScore">0</span></p>
+                    <p><strong>Max Height:</strong> <span id="onlyUpMaxHeight">0</span></p>
+                    <p><strong>Correct Answers:</strong> <span id="onlyUpCorrect">0</span></p>
+                </div>
+                <div class="button-group">
+                    <button onclick="returnToQuizSelector()" class="btn btn-primary">Play Another Quiz</button>
+                    <button onclick="goToQuizCreator()" class="btn btn-secondary">Create New Quiz</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Screen -->
+        <div id="profileScreen" class="screen">
+            <div class="container">
+                <h1>👤 Profile</h1>
+                <div id="profileContent"></div>
+                <button onclick="returnToQuizSelector()" class="btn btn-secondary">Back</button>
+            </div>
+        </div>
+
+        <!-- Cheat Code Screen -->
+        <div id="cheatScreen" class="screen">
+            <div class="container">
+                <h1>🎯 Cheat Codes</h1>
+                <div class="cheat-container">
+                    <p style="color: #666; font-size: 16px; text-align: center; margin-bottom: 30px;">Enter cheat codes to unlock exclusive items and bonuses!</p>
+                    
+                    <div class="cheat-input-section">
+                        <div class="form-group">
+                            <label for="cheatCodeInput">Cheat Code:</label>
+                            <input type="text" id="cheatCodeInput" placeholder="Enter cheat code..." class="form-control" style="text-transform: uppercase; font-size: 18px; padding: 15px;">
+                        </div>
+                        <button onclick="redeemCheat()" class="btn btn-primary" style="font-size: 18px; padding: 15px;">Redeem Cheat Code</button>
+                    </div>
+                    
+                    <div id="cheatMessage" class="cheat-message"></div>
+                    
+                    <div id="availableCheatsContainer" class="available-cheats">
+                        <!-- Cheat codes are shown only to admins when they open cheat screen -->
+                    </div>
+                </div>
+                <button onclick="returnToQuizSelector()" class="btn btn-secondary">Back</button>
+            </div>
+        <!-- Admin Panel Screen -->
+        <div id="adminPanel" class="screen">
+            <div class="container">
+                <h1>⚙️ Admin Panel</h1>
+                <div class="admin-panel-container">
+                    <div class="admin-tabs">
+                        <button class="admin-tab-btn active" onclick="switchAdminTab(event,'skins')">Add Skins</button>
+                        <button class="admin-tab-btn" onclick="switchAdminTab(event,'cheats')">Add Cheat Codes</button>
+                        <button class="admin-tab-btn" onclick="switchAdminTab(event,'manage')">Manage Content</button>
+                    </div>
+
+                    <!-- Add Skins Tab -->
+                    <div id="skinsTab" class="admin-tab active">
+                        <h2>Add New Skin</h2>
+                        <div class="form-group">
+                            <label>Skin Name:</label>
+                            <input type="text" id="newSkinName" placeholder="e.g., Cosmic Dragon" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Skin Color (Hex):</label>
+                            <input type="text" id="newSkinColor" placeholder="e.g., #FF6B6B" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Price (Coins):</label>
+                            <input type="number" id="newSkinPrice" placeholder="1000" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Category:</label>
+                            <select id="newSkinCategory" class="form-control">
+                                <option value="regular">Regular</option>
+                                <option value="exclusive">Exclusive</option>
+                            </select>
+                        </div>
+                        <button onclick="addNewSkin()" class="btn btn-primary">Add Skin</button>
+                        <div id="skinAddMessage" class="admin-message"></div>
+                    </div>
+
+                    <!-- Add Cheat Codes Tab -->
+                    <div id="cheatsTab" class="admin-tab">
+                        <h2>Add New Cheat Code</h2>
+                        <div class="form-group">
+                            <label>Cheat Code:</label>
+                            <input type="text" id="newCheatCode" placeholder="e.g., SUPERPOWER" class="form-control" style="text-transform: uppercase;">
+                        </div>
+                        <div class="form-group">
+                            <label>Cheat Name:</label>
+                            <input type="text" id="newCheatName" placeholder="e.g., Super Powers" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Bonus Coins:</label>
+                            <input type="number" id="newCheatCoins" placeholder="50000" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Bonus Points:</label>
+                            <input type="number" id="newCheatPoints" placeholder="25000" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Exclusive Skins (comma-separated):</label>
+                            <input type="text" id="newCheatSkins" placeholder="e.g., legendary_dragon,legendary_phoenix" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Exclusive Perks (comma-separated):</label>
+                            <input type="text" id="newCheatPerks" placeholder="e.g., god_mode,infinite_coins" class="form-control">
+                        </div>
+                        <button onclick="addNewCheatCode()" class="btn btn-primary">Add Cheat Code</button>
+                        <div id="cheatAddMessage" class="admin-message"></div>
+                    </div>
+
+                    <!-- Manage Content Tab -->
+                    <div id="manageTab" class="admin-tab">
+                        <h2>Manage Existing Content</h2>
+                        <div class="manage-section">
+                            <h3>Current Skins</h3>
+                            <div id="skinsList" class="manage-list"></div>
+                        </div>
+                        <div class="manage-section">
+                            <h3>Current Cheat Codes</h3>
+                            <div id="cheatsList" class="manage-list"></div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="returnToQuizSelector()" class="btn btn-secondary">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="brain-blitz.js"></script>
+</body>
+</html>
